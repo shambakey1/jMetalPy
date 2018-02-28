@@ -72,7 +72,8 @@ class IntegerSolution(Solution[int]):
         self.upper_bound = upper_bound
 
     def __copy__(self):
-        new_solution = FloatSolution(
+        #new_solution = FloatSolution(
+        new_solution = IntegerSolution(
             self.number_of_variables,
             self.number_of_objectives,
             self.number_of_constraints,

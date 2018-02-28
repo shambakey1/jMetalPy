@@ -131,9 +131,9 @@ class DominanceComparator():
             value2 = solution2.objectives[i]
             if value1 != value2:
                 if value1 < value2:
-                    best_is_one = 1
+                    best_is_one = 1 # TODO: should it be "best_is_one+=1"?
                 else:
-                    best_is_two = 1
+                    best_is_two = 1 # TODO: should it be "best_is_two+=1"?
 
         if best_is_one > best_is_two:
             result = -1
