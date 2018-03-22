@@ -47,5 +47,5 @@ def testBMTLIS(exp_conf_path:str):
 	'''
 
 if __name__ == '__main__':
-	testBMTLIS('/g/db/conf.yml')
+	testBMTLIS('conf.yml')
 	
