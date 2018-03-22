@@ -1,0 +1,21 @@
+ds_id: # Used to specify which datasets (i.e., ds_conf_id) to use
+- all # If 'all' exists, then use all datasets
+
+algorithms: # Specified algorithm(s) to run tests
+- BMFLIS # Balanced Makespan First, Least-Increase Second algorithm
+
+ds_conf: 
+ path: "/g/db/dataset_conf.csv"
+ sep: ";"
+ds_cons: 
+ path: "/g/db/dataset_constants.csv"
+ sep: ";"
+machines: 
+ path: "/g/db/machines.csv"
+ sep: ";"
+tasks: 
+ path: "/g/db/tasks.csv"
+ sep: ";"
+objectives:
+- name: makespan
+  weight: 1.0
