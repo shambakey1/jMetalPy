@@ -2,7 +2,8 @@ from copy import copy
 from random import Random
 from typing import TypeVar, List
 
-import numpy
+
+import numpy, time
 
 from jmetal.component.archive import BoundedArchive
 from jmetal.component.evaluator import Evaluator, SequentialEvaluator
@@ -74,6 +75,14 @@ class GLPSO(ParticleSwarmOptimization):
     def is_stopping_condition_reached(self) -> bool:
         return self.evaluations >= self.max_evaluations #TODO: Another condition should be added which is the accepted fitness difference threshold
 
+	def create_initial_solutions(self) -> List[FloatSolution]:
+		''' Creates a list of special initial solutions to be embedded within the initial swarm
+		@return: List of special initial solutions
+		@rtype: List[FloatSolution]
+		'''
+		
+    	pass
+    
     def create_initial_swarm(self) -> List[FloatSolution]:
         swarm = []
         for i in range(self.swarm_size):

@@ -6,6 +6,7 @@ Created on Jan 3, 2018
 '''
 
 import pandas as pd
+import yaml
 from typing import List
 
 from jmetal.util import machine, task
@@ -23,14 +24,18 @@ def load_ds(f_path:str)->dict:
     @rtype: dict  
     '''
     
-    ds_prop_f=pd.read_json(f_path)
-    ds_conf=pd.read_csv(ds_prop_f.ds_conf.path,ds_prop_f.ds_conf.sep)
-    ds_cons=pd.read_csv(ds_prop_f.ds_cons.path,ds_prop_f.ds_cons.sep)
-    machines=pd.read_csv(ds_prop_f.machines.path,ds_prop_f.machines.sep)
-    tasks=pd.read_csv(ds_prop_f.tasks.path,ds_prop_f.tasks.sep)
-    ds_prop={'conf':ds_conf,'cons':ds_cons,'machines':machines,'tasks':tasks}
+    #ds_prop_f=pd.read_json(f_path)
+    with open(f_path,'r') as f:
+    	ds_prop_f=yaml.load(f)
+    
+    ds_conf=pd.read_csv(ds_prop_f['ds_conf']['path'],ds_prop_f['ds_conf']['sep'])
+    ds_cons=pd.read_csv(ds_prop_f['ds_cons']['path'],ds_prop_f['ds_cons']['sep'])
+    machines=pd.read_csv(ds_prop_f['machines']['path'],ds_prop_f['machines']['sep'])
+    tasks=pd.read_csv(ds_prop_f['tasks']['path'],ds_prop_f['tasks']['sep'])
+    objs=ds_prop_f['objectives']
+    ds_prop={'conf':ds_conf,'cons':ds_cons,'machines':machines,'tasks':tasks,'objectives':objs}
     return ds_prop
-
+   
 def bmta(mach: List[Machine], tasks: List[Task])-> List[Task]:
     ''' Balanced Makespan Task Assignment algorithm: one way to assign tasks to machines with \
     approximately equal (as much as possible) makespan for each machine. Currently, the order of tasks in \
@@ -70,6 +75,7 @@ def lmita(mach: List[Machine],tasks:List[Task])->None:
     @param tasks: List of tasks
     @type tasks: List[Task]
     '''
+	
     machine.sortMachinesSpeed(mach)   # Sort list of machines in descending order of speed
     task.sortTaskLength(tasks)        # Sort list of tasks in descending order of length
     for t in tasks:

@@ -135,6 +135,7 @@ class Schedule(FloatProblem):
         self.objectives=[]  # Initialize an empty set of objectives for the scheduling problem
         self.machin=machin  # List of machines
         self.tin=tin        # List of tasks
+        self.consts=consts	# List of constraints
         
         # Define required scheduling objective(s) with weight(s) for each objective if any
         for obj in objs:
@@ -180,13 +181,16 @@ class Schedule(FloatProblem):
         ''' Return tasks list '''
         
         return self.tin
+    
+    def getObjs(self):
+    	''' Return scheduling objectives '''
+    	return self.objectives
 
     class ObjectiveMakespan(Objective):
         ''' Minimum makespan objective ''' 
         
-        def __init__(self,weight:float=1.0):
-            super.__init__()
-            self.weight=weight  # Assign weight for current objective
+        def __init__(self,weight:float=1.0,thr:float=0.0):
+            super().__init__(weight,thr)
             
         def compute(self, solution: FloatSolution, problem: FloatProblem):
             return max(solution.variables)*self.weight
@@ -194,10 +198,9 @@ class Schedule(FloatProblem):
     class ObjectiveCost(Objective):
         ''' Minumum cost objective '''
         
-        def __init__(self,machin:List[Machine], weight:float=1.0):
-            super.__init__()
+        def __init__(self,machin:List[Machine], weight:float=1.0,thr:float=0.0):
+            super().__init__(weight,thr)
             self.machin=machin
-            self.weight=weight  # Assign weight for current objective
             
         def compute(self, solution: FloatSolution, problem: FloatProblem):
             return sum(m.cost*solution.variables[i] for i in range(self.number_of_variables) for m in self.machin if m.id==i)
@@ -205,9 +208,8 @@ class Schedule(FloatProblem):
     class ObjectiveEnergy(Objective):
         ''' Minimum energy objective '''
         
-        def __init__(self,weight:float=1.0):
-            super.__init__()
-            self.weight=weight  # Assign weight for current objective
+        def __init__(self,weight:float=1.0,thr:float=0.0):
+            super().__init__(weight,thr)
             
         def compute(self, solution:FloatSolution, problem:FloatProblem)->float:
             return 0.0  #FIXME: Modify energy objective implementation

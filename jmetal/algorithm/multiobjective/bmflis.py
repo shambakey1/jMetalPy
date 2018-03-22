@@ -21,7 +21,7 @@ class BMFLIS(Algorithm[None,None]):
         '''
         The algorithm expects a SCHEDULE problem
         '''
-        super.__init__()
+        super().__init__()
         self.problem=problem
         self.machin=self.problem.getMachines()  # Retrieve list of machines from input scheduling problem
         self.tin=self.problem.getTasks()        # Retrieve list of tasks from input scheduling problem
@@ -30,5 +30,8 @@ class BMFLIS(Algorithm[None,None]):
         self.start_computing_time = time.time()
         lmita(self.machin, bmta(self.machin, self.tin))
         self.total_computing_time = self.get_current_computing_time()
+        results={'start':self.start_computing_time,'end':self.start_computing_time+self.total_computing_time,\
+				'total_time':self.total_computing_time}
+        print('start: '+str(self.start_computing_time)+', end: '+str(self.start_computing_time+self.total_computing_time)+', total: '+str(self.total_computing_time))
         
         

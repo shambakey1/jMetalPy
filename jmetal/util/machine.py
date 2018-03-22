@@ -85,3 +85,20 @@ def genMachines(ds_id:int, mach_conf:DataFrame)-> List[Machine]:
     '''
     
     return [Machine(ds_id,i.machine_id,i.speed) for i in mach_conf.itertuples() if i.dataset_conf_id==ds_id]
+   
+def getMachMaxMakespan(mach: List[Machine])->Machine:
+	''' Extract the machine from the input list with maximum makespan
+	@param mach: List of machines
+	@type mach: List[Machine]  
+	@return: Machine with maximum makespan
+	@rtype: Machine
+	'''
+	
+	max_makespan=0.0
+	max_m=None
+	for m in mach:
+		if m.makespan>max_makespan:
+			max_m=m
+			max_makespan=m.makespan
+	return max_m
+	

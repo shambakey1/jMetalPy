@@ -104,6 +104,9 @@ class ParticleSwarmOptimization(Algorithm[FloatSolution, List[FloatSolution]]):
 
     def is_stopping_condition_reached(self) -> bool:
         pass
+       
+    def create_initial_solutions(self) -> List[FloatSolution]:
+    	pass
 
     def create_initial_swarm(self) -> List[FloatSolution]:
         pass
