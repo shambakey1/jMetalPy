@@ -54,4 +54,6 @@ def genTasks(ds_id:int, task_conf:DataFrame)->List[Task]:
     @rtype: List[Task]    
     '''
     
-    return [Task(ds_id,i.task_id,i.length) for i in task_conf.itertuples() if i.dataset_conf_id==ds_id]
+    import copy
+    
+    return copy.deepcopy([Task(ds_id,i.task_id,i.length) for i in task_conf.itertuples() if i.dataset_conf_id==ds_id])

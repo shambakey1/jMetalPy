@@ -33,7 +33,12 @@ def load_ds(f_path:str)->dict:
     machines=pd.read_csv(ds_prop_f['machines']['path'],ds_prop_f['machines']['sep'])
     tasks=pd.read_csv(ds_prop_f['tasks']['path'],ds_prop_f['tasks']['sep'])
     objs=ds_prop_f['objectives']
-    ds_prop={'conf':ds_conf,'cons':ds_cons,'machines':machines,'tasks':tasks,'objectives':objs}
+    algs=ds_prop_f['algorithms']
+    res_path=ds_prop_f['results_path']
+    ds_ids=ds_prop_f['ds_id']
+    iterations=ds_prop_f['iter']
+    ds_prop={'conf':ds_conf,'cons':ds_cons,'machines':machines,'tasks':tasks,'objectives':objs,\
+             'algorithms':algs,'results_path':res_path,'ds_ids':ds_ids,'iterations':iterations}
     return ds_prop
    
 def bmta(mach: List[Machine], tasks: List[Task])-> List[Task]:

@@ -34,7 +34,7 @@ class Machine(object):
         self.ds_conf_id=int(ds_conf_id)
         self.id=int(machine_id)
         self.speed=float(speed)
-        self.makespan=0.0
+        self.makespan=0.0   # Makespan of current machine is the same as availability time of current machine
         self.cost=cost
         self.energy=energy
         self.tasks=[]
@@ -51,7 +51,15 @@ class Machine(object):
         self.tasks.append(t)    # Add task to task list of current machine. Currently, addition order is not important
         self.makespan+=t.length/self.speed  # Modify makespan of current machine
         t.m=self    # Assign current machine to input task. TODO: This may lead to spaghetti programming
-         
+        
+    def resetMachine(self)->None:
+        ''' Remove any assigned tasks to this machine, as well as remove the machine from the task 
+        '''
+
+        for t in self.tasks:
+            t.m=None
+        self.tasks=[]
+        self.makespan=0.0
         
 def sortMachinesSpeed(mach: List[Machine],desc:bool=True)->None:
     ''' Sort List of machines according to descending order of machine speed.
@@ -84,7 +92,9 @@ def genMachines(ds_id:int, mach_conf:DataFrame)-> List[Machine]:
     @rtype: List[Machine]    
     '''
     
-    return [Machine(ds_id,i.machine_id,i.speed) for i in mach_conf.itertuples() if i.dataset_conf_id==ds_id]
+    import copy
+    
+    return copy.deepcopy([Machine(ds_id,i.machine_id,i.speed) for i in mach_conf.itertuples() if i.dataset_conf_id==ds_id])
    
 def getMachMaxMakespan(mach: List[Machine])->Machine:
 	''' Extract the machine from the input list with maximum makespan
@@ -101,4 +111,11 @@ def getMachMaxMakespan(mach: List[Machine])->Machine:
 			max_m=m
 			max_makespan=m.makespan
 	return max_m
+
+def resetMachines(mach: List[Machine])->None:
+    ''' Clean assigned tasks for set of machines
+    '''
+    
+    for m in mach:
+        m.resetMachine()
 	
