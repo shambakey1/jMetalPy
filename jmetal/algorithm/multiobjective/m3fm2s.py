@@ -1,20 +1,22 @@
 '''
-Created on Jul 23, 2018
+Created on Jul 26, 2018
 
 @author: shambakey1
 @contact: shambakey1@gmail.com
 '''
 
+from jmetal.util.sched_utils import maxmin_core, maxmin_makespan_thr_core
 from jmetal.problem.multiobjective.constrained import Schedule
 from jmetal.core.algorithm import Algorithm
 from jmetal.util import machine
-from jmetal.util.sched_utils import maxmin_core
 
-import time, sys
+import time
 
-class MAXMIN(Algorithm[None,None]):
+class M3FM2S(Algorithm[None,None]):
     '''
-    MAXMIN scheduling algorithm to minimize makespan
+    Max-Min with Makespan threshold First, Max-Min Second algorithm: Simple deterministic algorithm to schedule independent \
+    tasks over heterogeneous (virtual) machines. The M3FM2S applies the Max-Min with Makespan threshold \
+    algorithm in the first phase, then the Max-Min Task Allocation second.
     '''
 
     def __init__(self, problem: Schedule):
@@ -37,21 +39,19 @@ class MAXMIN(Algorithm[None,None]):
         @rtype: Dictionary
         '''
         
-        # Record running time of MINMIN
+        # Record running time of BMFMMS
         self.start_computing_time = time.time()
-        
-        # Run the core of the maxmin algorithm
-        maxmin_core(self.machin,self.tin)
-
-        # Record end of MINMIN running time
+        makespan_in=sum([i.length for i in self.tin])/sum([j.speed for j in self.machin])
+        #maxmin_makespan_thr_core(self.machin, self.tin,makespan_in)
+        maxmin_core(self.machin, self.tin,maxmin_makespan_thr_core(self.machin, self.tin,makespan_in))
         self.total_computing_time = self.get_current_computing_time()
-        runtime_res={'algorithm':'MAXMIN','ds_id':ds_id,'iteration':iteration,'start':self.start_computing_time,'end':self.start_computing_time+self.total_computing_time,\
+        runtime_res={'algorithm':'M3FM2S','ds_id':ds_id,'iteration':iteration,'start':self.start_computing_time,'end':self.start_computing_time+self.total_computing_time,\
                 'total_time':self.total_computing_time,'max_makespan':machine.getMachMaxMakespan(self.machin).makespan}
         
         # Record machines' assigned tasks, makespan and any other required properties 
         m_res=[]
         for m in self.machin:
-            m_res.append({'algorithm':'MAXMIN','ds_id':ds_id,'iteration':iteration,'machine_id':m.id,'tasks':\
+            m_res.append({'algorithm':'M3FM2S','ds_id':ds_id,'iteration':iteration,'machine_id':m.id,'tasks':\
                       [t.id for t in m.tasks],'makespan':m.makespan})
         
         # Reset machines

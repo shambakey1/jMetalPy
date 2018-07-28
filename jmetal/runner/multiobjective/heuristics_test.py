@@ -9,6 +9,8 @@ from jmetal.problem.multiobjective.constrained import Schedule
 from jmetal.algorithm.multiobjective.bmflis import BMFLIS
 from jmetal.algorithm.multiobjective.minmin import MINMIN
 from jmetal.algorithm.multiobjective.maxmin import MAXMIN
+from jmetal.algorithm.multiobjective.bmfmms import BMFMMS
+from jmetal.algorithm.multiobjective.m3fm2s import M3FM2S
 from jmetal.util.sched_utils import load_ds
 from jmetal.util import machine, task
 import os, time
@@ -71,6 +73,22 @@ def main()->None:
                     final_res['run_time'].append(res['run_time'])
                     final_res['mach_res'].extend(res['mach_res'])
                     print('Algorithm:MAXMIN, dataset: '+str(ds_id)+', iteration: '+str(i))
+            # BMFMMS algorithm
+            elif alg_id=='BMFMMS':
+                alg=BMFMMS(problem=problem)
+                for i in range(iterations):
+                    res=alg.run(ds_id=ds_id,iteration=i)
+                    final_res['run_time'].append(res['run_time'])
+                    final_res['mach_res'].extend(res['mach_res'])
+                    print('Algorithm:BMFMMS, dataset: '+str(ds_id)+', iteration: '+str(i))
+            # M3FM2S algorithm
+            elif alg_id=='M3FM2S':
+                alg=M3FM2S(problem=problem)
+                for i in range(iterations):
+                    res=alg.run(ds_id=ds_id,iteration=i)
+                    final_res['run_time'].append(res['run_time'])
+                    final_res['mach_res'].extend(res['mach_res'])
+                    print('Algorithm:BMFMMS, dataset: '+str(ds_id)+', iteration: '+str(i))
                     
     # Record running time results
     with open(res_running_time,'a') as f:

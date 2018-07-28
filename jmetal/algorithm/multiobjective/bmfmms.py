@@ -1,20 +1,22 @@
 '''
-Created on Jul 23, 2018
+Created on Jul 25, 2018
 
 @author: shambakey1
 @contact: shambakey1@gmail.com
 '''
 
+from jmetal.util.sched_utils import bmta, maxmin_core
 from jmetal.problem.multiobjective.constrained import Schedule
 from jmetal.core.algorithm import Algorithm
 from jmetal.util import machine
-from jmetal.util.sched_utils import maxmin_core
 
-import time, sys
+import time
 
-class MAXMIN(Algorithm[None,None]):
+class BMFMMS(Algorithm[None,None]):
     '''
-    MAXMIN scheduling algorithm to minimize makespan
+    Balanced Makespan First, Max-Min Second algorithm: Simple deterministic algorithm to schedule independent \
+    tasks over heterogeneous (virtual) machines. The BMFMMS applies the Balanced Makespan Task Allocation (BMTA) \
+    algorithm in the first phase, then the Max-Min Task Allocation second.
     '''
 
     def __init__(self, problem: Schedule):
@@ -37,21 +39,17 @@ class MAXMIN(Algorithm[None,None]):
         @rtype: Dictionary
         '''
         
-        # Record running time of MINMIN
+        # Record running time of BMFMMS
         self.start_computing_time = time.time()
-        
-        # Run the core of the maxmin algorithm
-        maxmin_core(self.machin,self.tin)
-
-        # Record end of MINMIN running time
+        maxmin_core(self.machin, bmta(self.machin, self.tin))
         self.total_computing_time = self.get_current_computing_time()
-        runtime_res={'algorithm':'MAXMIN','ds_id':ds_id,'iteration':iteration,'start':self.start_computing_time,'end':self.start_computing_time+self.total_computing_time,\
+        runtime_res={'algorithm':'BMFMMS','ds_id':ds_id,'iteration':iteration,'start':self.start_computing_time,'end':self.start_computing_time+self.total_computing_time,\
                 'total_time':self.total_computing_time,'max_makespan':machine.getMachMaxMakespan(self.machin).makespan}
         
         # Record machines' assigned tasks, makespan and any other required properties 
         m_res=[]
         for m in self.machin:
-            m_res.append({'algorithm':'MAXMIN','ds_id':ds_id,'iteration':iteration,'machine_id':m.id,'tasks':\
+            m_res.append({'algorithm':'BMFMMS','ds_id':ds_id,'iteration':iteration,'machine_id':m.id,'tasks':\
                       [t.id for t in m.tasks],'makespan':m.makespan})
         
         # Reset machines
