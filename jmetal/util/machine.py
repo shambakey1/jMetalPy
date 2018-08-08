@@ -45,12 +45,19 @@ class Machine(object):
         ''' Add a task to current machine
         @param t: Task to be added to current machine
         @type t: Task
-        @return: Modifies current task list, as well as other attributes (e.g., makespan) of current machine
-        @rtype: None
         '''  
         self.tasks.append(t)    # Add task to task list of current machine. Currently, addition order is not important
         self.makespan+=t.length/self.speed  # Modify makespan of current machine
         t.m=self    # Assign current machine to input task. TODO: This may lead to spaghetti programming
+    
+    def remTask(self,t:Task)->None:
+        ''' Remove specified task from current machine
+        @param t: Task to be removed to current machine
+        @type t: Task
+        '''
+        self.tasks.remove(t)
+        self.makespan-=t.length/self.speed
+        t.m=None
         
     def resetMachine(self)->None:
         ''' Remove any assigned tasks to this machine, as well as remove the machine from the task 

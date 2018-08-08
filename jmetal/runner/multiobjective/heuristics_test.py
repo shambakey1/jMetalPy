@@ -53,7 +53,7 @@ def main()->None:
             if alg_id=='BMFLIS':
                 alg=BMFLIS(problem=problem)
                 for i in range(iterations):
-                    res=alg.run(ds_id=ds_id,iteration=i)
+                    res=alg.run(ds_id=ds_id,iteration=i,th_per=0.0)
                     final_res['run_time'].append(res['run_time'])
                     final_res['mach_res'].extend(res['mach_res'])
                     print('Algorithm:BMFLIS, dataset: '+str(ds_id)+', iteration: '+str(i))

@@ -10,11 +10,12 @@ import yaml
 from typing import List
 
 from jmetal.util import machine, task
-from jmetal.util.machine import Machine
+from jmetal.util.machine import Machine, getMachMaxMakespan
 from jmetal.util.task import Task
 from builtins import int
 
 import sys
+from asyncio import tasks
 
 
 def load_ds(f_path:str)->dict:
@@ -42,8 +43,39 @@ def load_ds(f_path:str)->dict:
     ds_prop={'conf':ds_conf,'cons':ds_cons,'machines':machines,'tasks':tasks,'objectives':objs,\
              'algorithms':algs,'results_path':res_path,'ds_ids':ds_ids,'iterations':iterations}
     return ds_prop
+
+def th_makespan(mach: List[Machine], tasks: List[Task])->float:
+    ''' Calculate theoretical bound on makespan for uniform parallel machines as given by Lemma 5.2.10 in the 
+    book of 'Scheduling Theory, Algorithms, and Systems' fourth edition. The theoritical makespan bound is cal-
+    culated by the sum of lengths of the longest k tasks over the sum of the speeds of the k fastest machines.
+    @param mach: List of machines to assign tasks
+    @type mach: List[Machines]
+    @param tasks: List of task to assign to machines
+    @type tasks: List[Task]
+    @return: Theoretical makespan
+    @rtype: float
+    '''
+    machine.sortMachinesSpeed(mach)   # Sort list of machines in descending order of speed
+    task.sortTaskLength(tasks)        # Sort list of tasks in descending order of length
+    
+    n=len(tasks)    # Number of tasks
+    m=len(mach)     # Number of machines
+    k=max(n,m)      # Holds maximum between number of tasks and number of machines
+    len_sum=0       # Holds current sum of jobs lengths
+    speed_sum=0     # Holds current sum of machines speeds
+    th_makespan=0   # Holds theoretical makespan
+    
+    for i in range(k):
+        if tasks[i]:
+            len_sum+=tasks[i].length
+        if mach[i]:
+            speed_sum+=mach[i].speed
+        if th_makespan<len_sum/speed_sum:
+            th_makespan=len_sum/speed_sum
+        return th_makespan
+     
    
-def bmta(mach: List[Machine], tasks: List[Task])-> List[Task]:
+def bmta(mach: List[Machine], tasks: List[Task], th_per:float=0.0)-> List[Task]:
     ''' Balanced Makespan Task Assignment algorithm: one way to assign tasks to machines with \
     approximately equal (as much as possible) makespan for each machine. Currently, the order of tasks in \
     the same machine is not important. The algorithm works by assuming initial equal makespan for all machines. \
@@ -54,12 +86,17 @@ def bmta(mach: List[Machine], tasks: List[Task])-> List[Task]:
     @type mach: List[Machines]
     @param tasks: List of task to assign to machines
     @type tasks: List[Task]
+    @param th_per: Threshold percentage that should be added over the theoritical bound on makespan to allow for more tasks to be assigned to each machine
+    @type th_per: float  
     @return: Set of remaining unassigned tasks if any
     @rtype: List[Task]    
     '''
     machine.sortMachinesSpeed(mach)   # Sort list of machines in descending order of speed
     task.sortTaskLength(tasks)        # Sort list of tasks in descending order of length
-    init_ms=sum(t.length for t in tasks)/sum(m.speed for m in mach)   # Initial equal makespan for all machines
+    #tmp_max_makespan=sum(t.length for t in tasks)/mach[0].speed         # Initial max makespan calculated as the sum of lengths of all tasks when executed on the fastest machine
+    #init_ms=sum(t.length for t in tasks)/sum(m.speed for m in mach)   # Initial equal makespan for all machines
+    init_ms=th_makespan(mach, tasks)   # Initial equal makespan for all machines
+    #init_ms+=(tmp_max_makespan-init_ms)*th_per
     for m in mach:  # Check machine in descending order of speed
         init_ms_cp=init_ms  # Set initial makespan for current machine
         tmp_tasks=[]    # Holds remaining tasks for next machine
@@ -94,6 +131,52 @@ def lmita(mach: List[Machine],tasks:List[Task])->None:
                 tmp_m=m # Current machine is a candidate to run current task
                 tmp_ms=m.makespan+t.length/m.speed  # Modify temporary makespan
         tmp_m.addTask(t)    # Assign current task to the machine with least makespan increase
+
+def redTasks(mach: List[Machine],tasks:List[Task])->None:
+    ''' Redistributed tasks from the machine with maximum makespan, using @lmita algorithm, if this will reduce makespan
+    @param mach: List of machines
+    @type mach: List[Machine]
+    @param tasks: List of tasks
+    @type tasks: List[Task]
+    '''
+    
+    # Find the machine with maximum completion time (i.e., maximum makespan)
+    m=getMachMaxMakespan(mach)
+    
+    # Find current makespan before re-assigning tasks
+    makespan_before=m.makespan
+    
+    # Retrive list of tasks from the machine with maximum makespan arranged in ascending order of length
+    m_ts=m.tasks.copy()
+    task.sortTaskLength(m_ts,False) 
+    
+    # Loop until maximum makespan cannot be reduced any more, or all tasks from machine, with maximum makespan, are re-assigned
+    while m_ts:
+        
+        # Find the shortest task on the machine
+        st=m_ts[0]
+        
+        # Remove shortest task from the machine with maximum makespan
+        m.remTask(st)
+        
+        # Add shortest task to the machine that causes minimum increase in completion 
+        lmita(mach,[st])
+        
+        # Extract the new makespan
+        m_after=getMachMaxMakespan(mach)
+        makespan_after=m_after.makespan
+        
+        # If the new makespan is not improved, then restore last task distribution, then exit.
+        #Otherwise, continue distributing tasks
+        if makespan_before<makespan_after:
+            m_ass=st.m  # The machine to which the shortest task is re-assigned
+            m_ass.remTask(st)
+            m.addTask(st)
+            break
+        else:
+            m_ts.remove(st)
+            makespan_before=makespan_after
+        
 
 def maxmin_core(mach: List[Machine],tasks:List[Task],ct=None)->None:
     ''' The core code of the Max-Min scheduling algorithm. The algorithm starts by determining for each task 

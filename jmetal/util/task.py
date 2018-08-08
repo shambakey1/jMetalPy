@@ -43,6 +43,22 @@ def sortTaskLength(tasks: List[Task],desc:bool=True)->None:
     from operator import attrgetter
     tasks.sort(key=attrgetter('length'),reverse=desc)
 
+def getShortestTask(tasks: List[Task])->Task:
+    ''' Retrive task with shortest length
+    @param tasks: List of tasks to be ordered
+    @type tasks: List[Task]
+    '''
+    
+    min_len=tasks[0].length # Temporary variable to compare tasks lengths
+    min_task=tasks[0]       # Temporary variable for the shortest task
+    
+    for t in tasks[1:]:
+        if t.length<min_len:
+            min_len=t.length
+            min_task=t
+    
+    return min_task
+
 def genTasks(ds_id:int, task_conf:DataFrame)->List[Task]:
     '''
     Generate set of tasks from input task configuration
